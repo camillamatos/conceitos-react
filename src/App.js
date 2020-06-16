@@ -5,6 +5,7 @@ import "./styles.css";
 
 function App() {
   const [repositories, setRepositories] = useState([]);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     api.get('repositories').then(response => {
@@ -12,16 +13,31 @@ function App() {
     });
   }, []);
 
+  function handleInputChange(event){
+    const {name, value} = event.target;
+
+    setData({...data, [name]: value});
+
+  }
+
   async function handleAddRepository() {
+    const { title, url, techs } = data;
+
+   const tech = techs.trim().split(',');
+
     const response = await api.post('repositories', {
-      title: `Novo repositório ${Date.now()}`,
-      url: "https://github.com/camillamatos",
-      techs: ['JavaScript', 'nodejs'],
+      title,
+      url,
+      techs: tech,
     });
 
     const repository = response.data;
 
     setRepositories([ ... repositories, repository]);
+
+    document.getElementById('title').value = "";
+    document.getElementById('url').value = "";
+    document.getElementById('techs').value = "";
   }
 
   async function handleRemoveRepository(id) {
@@ -43,7 +59,14 @@ function App() {
           )}
       </ul>
 
-      <button onClick={handleAddRepository}>Adicionar</button>
+      <fieldset className="fields">
+        <input name="title" id="title" placeholder="Título" onChange={handleInputChange} />
+        <input name="url" id="url" placeholder="URL" onChange={handleInputChange}/>
+        <input name="techs" id="techs" placeholder="Tecnologias" onChange={handleInputChange}/>
+
+        <button onClick={handleAddRepository}>Adicionar</button>
+      </fieldset>
+      
     </div>
   );
 }
